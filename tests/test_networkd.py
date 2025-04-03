@@ -3,6 +3,12 @@ from networkd import networkd as nd
 
 ##unit tests for prep_data()
 
+def test_tuple_output():
+    data = {'category': ['a', 'b', 'c'], 'entity': ['d', 'e', 'f'], 'value': [1,1,1]}
+    expected_output = 3
+    result = len(nd.Embed.prep_data(data))
+    assert expected_output == result, print(f'expected 3 items but got{result}')
+
 def test_prep_data_dict():
     '''
     make sure that the prep_data function can properly handle a dictionary as input 
@@ -200,3 +206,5 @@ def test_filter_df_large_dataset():
 
     result = nd.Embed.embed(data, rca = True, threshold = 1)
     assert result.shape == (expected_rows, expected_cols)
+
+
