@@ -36,7 +36,6 @@ class Embed:
         if len(data) < 3:
             data['value'] = np.ones(len(next(iter(data.values()))), dtype=int).tolist()
         
-        
         keys = list(data.keys())
 
         row_labels, col_labels = (np.unique(data[k]) for k in list(data.keys())[:2])
@@ -57,7 +56,7 @@ class Embed:
 
         
     @staticmethod
-    def filter_df(np_adj, threshold):
+    def filter_df(np_adj, threshold, rca_raw = False):
         '''
         Intake a numpy array adjacency matrix and filter the values by 
         if the share of the category value within an entity is greater than 
@@ -65,11 +64,14 @@ class Embed:
         
         Parameters
         ----------
-        data: pandas dataframe 
+        np_adj: numpy array adjacency matrix 
+        threshold: numeric threshold to determine retention of an edge. 
+        rca_raw: if True return continuous weighted edges as calculated by Revealed Comparative Advantage (RCA)
 
         Returns
         -------
-        filtered_data: adjacency matrix as an n(# of categories) by m(# of entities) numpy array. 
+        filtered_data: adjacency matrix as an n(# of categories) by m(# of entities) numpy array. With RCA applied
+        and returned as descretized entries or continuous weighted entries depending on raw_rca parameter. 
         '''
         if isinstance(np_adj, np.ndarray): 
             pass
@@ -81,9 +83,11 @@ class Embed:
 
         rca_np = cat_share_in_ent / cat_share_all
 
-        rca_np = np.where(rca_np < threshold, 0, 1)
-
-        return rca_np 
+        if rca_raw == False:
+            rca_np = np.where(rca_np < threshold, 0, 1)
+            return rca_np
+        else:
+            return rca_np 
         
                 
     @staticmethod
