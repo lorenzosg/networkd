@@ -108,7 +108,8 @@ class Embed:
         '''
         gram_np = np.dot(rca_np, rca_np.T)
 
-        degree = np.count_nonzero(rca_np, axis = 1)
+        degree = rca_np.sum(axis = 1, keepdims = True)
+        degree[degree == 0] = 1
 
         gram_np = gram_np / degree 
 
@@ -123,7 +124,7 @@ class Embed:
 
                 
     @staticmethod            
-    def embed(data, rca = True, threshold = 1, self_loops = True, labels = False):
+    def embed(data, rca = True, threshold = 1, self_loops = True, labels = False, rca_raw):
         '''
         Call helper functions prep_data and filter_df if necessary in order to embed the data
         by constructing a co-occurence matrix of the bi-partite graph.  
@@ -140,7 +141,7 @@ class Embed:
         matrix, row_labels, col_labels = Embed.prep_data(data)
             
         if rca:
-            matrix = Embed.filter_df(matrix, threshold)
+            matrix = Embed.filter_df(matrix, threshold, rca_raw)
         co_occ_np = Embed.co_occurence(matrix, self_loops)
 
         return co_occ_np, row_labels, col_labels 
