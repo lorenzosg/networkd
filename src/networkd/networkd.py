@@ -56,7 +56,7 @@ class Embed:
 
         
     @staticmethod
-    def filter_df(np_adj, threshold, rca_raw = False):
+    def filter_df(np_adj, threshold, rca_raw = False, weighting = False):
         '''
         Intake a numpy array adjacency matrix and filter the values by 
         if the share of the category value within an entity is greater than 
@@ -91,10 +91,21 @@ class Embed:
 
         rca_np = cat_share_in_ent / cat_share_all
 
-        if rca_raw:
-            return rca_np
-        else:
-            return np.where(rca_np < threshold, 0, 1)
+        if weighting != False:
+            lengths = (rca_np > 0).sum(axis=0, keepdims=True)
+            lengths[lengths == 0] = 1
+            if weighting == 'inverse':
+                weight = 1 / lengths
+            elif weighting == 'sqrt':
+                weight = 1/ np.sqrt(lengths)
+            elif weighting == 'log':
+                weight = 1 / np.sqrt(np.log(lengths + 1))
+            else: 
+                raise ValueError(f"Unrecognized weighting: {weighting}")
+            rca_np = rca_np * weight
+        
+
+        return rca_np if rca_raw else np.where(rca_np < threshold, 0, 1)
         
                 
     @staticmethod
@@ -131,7 +142,7 @@ class Embed:
 
                 
     @staticmethod            
-    def embed(data, rca_raw, rca = True, threshold = 1, self_loops = True, labels = False):
+    def embed(data, rca_raw, weighting, rca = True, threshold = 1, self_loops = True, labels = False):
         '''
         Call helper functions prep_data and filter_df if necessary in order to embed the data
         by constructing a co-occurence matrix of the bi-partite graph.  
@@ -148,7 +159,7 @@ class Embed:
         matrix, row_labels, col_labels = Embed.prep_data(data)
             
         if rca:
-            matrix = Embed.filter_df(matrix, threshold, rca_raw)
+            matrix = Embed.filter_df(matrix, threshold, rca_raw, weighting)
         co_occ_np = Embed.co_occurence(matrix, self_loops)
 
         return co_occ_np, row_labels, col_labels 
