@@ -78,16 +78,23 @@ class Embed:
         else:
             raise TypeError(f'input must be a numpy array, got {type(np_adj)} instead')
         
-        cat_share_in_ent = np_adj / np_adj.sum(axis = 0, keepdims = True)
-        cat_share_all = np_adj.sum(axis = 1, keepdims = True) / np_adj.sum()
+        
+        col_sum = np_adj.sum(axis = 0, keepdims = True)
+        col_sum[col_sum == 0] = 1  # avoid divide by 0
+        cat_share_in_ent = np_adj / col_sum
+
+        
+        row_sum = np_adj.sum(axis = 1, keepdims = True) 
+        row_sum[row_sum == 0] = 1
+        total_sum = np_adj.sum()
+        cat_share_all = row_sum / (total_sum if total_sum != 0 else 1)
 
         rca_np = cat_share_in_ent / cat_share_all
 
-        if rca_raw == False:
-            rca_np = np.where(rca_np < threshold, 0, 1)
+        if rca_raw:
             return rca_np
         else:
-            return rca_np 
+            return np.where(rca_np < threshold, 0, 1)
         
                 
     @staticmethod
