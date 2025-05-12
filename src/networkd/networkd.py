@@ -124,7 +124,7 @@ class Embed:
 
                 
     @staticmethod            
-    def embed(data, rca = True, threshold = 1, self_loops = True, labels = False, rca_raw):
+    def embed(data, rca_raw, rca = True, threshold = 1, self_loops = True, labels = False):
         '''
         Call helper functions prep_data and filter_df if necessary in order to embed the data
         by constructing a co-occurence matrix of the bi-partite graph.  
